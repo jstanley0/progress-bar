@@ -104,8 +104,9 @@ ISR(TIMER0_COMPB_vect)
 static volatile uint8_t g_ledIntensity;
 ISR(TIMER1_COMPA_vect)
 {
-    if ((PINB & 1) == 0) {
-        // pressing the button cancels the timer
+    // pressing the button cancels the timer
+    // but don't accept an input immediately after starting, as a debouncing measure
+    if (((PINB & 1) == 0) && (g_activeLed > 0 || g_ledIntensity > 4)) {
         g_activeLed = 10;
     }
     else if (g_activeLed < 10) {
@@ -150,7 +151,7 @@ void run_progress_bar()
 void test_led()
 {
     io_init();
-    
+
     for(uint8_t i = 0; i < 10; ++i) {
         set_led(i);
         _delay_ms(50);
